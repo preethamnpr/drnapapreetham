@@ -719,7 +719,7 @@
       </div>
     </div>
   </section>
-    <!-- OPD SCHEDULE & HOSPITAL LOCATION -->
+  <!-- OPD SCHEDULE & HOSPITAL LOCATION -->
   <section id="opd-info" class="py-16 md:py-24 bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
@@ -1065,5 +1065,259 @@
 
         <h3 class="text-2xl font-black text-brand-navy">Appointment Request Received</h3>
         <p class="text-sm text-slate-600">
-          Thank you, <strong id="modalPatientN
-  
+          Thank you, <strong id="modalPatientName" class="text-brand-navy"></strong>! Your appointment request has been logged with Dr. Napa Preetham's outpatient department.
+        </p>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left text-xs space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Consultant:</span>
+            <span class="font-bold text-slate-800">Dr. Napa Preetham (MBBS, DNB, IDCCM)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Location:</span>
+            <span class="font-bold text-slate-800">OPD Room 7, Aster Narayanadri Hospital</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Requested Date:</span>
+            <span class="font-bold text-teal-700" id="modalDate"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Specialty / Concern:</span>
+            <span class="font-bold text-slate-800" id="modalConcern"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Registered Phone:</span>
+            <span class="font-bold text-slate-800" id="modalPhone"></span>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-500">
+          Please arrive 15 minutes ahead of your slot with all prior chest scans, pulmonary reports, and prescriptions.
+        </p>
+
+        <div class="flex gap-3 pt-2">
+          <button onclick="closeModal()" class="w-full py-2.5 rounded-xl bg-brand-navy hover:bg-brand-navyLight text-white font-bold text-sm transition">
+            Close &amp; Return
+          </button>
+          <a id="modalWhatsAppBtn" target="_blank" href="#" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition flex items-center justify-center gap-1.5">
+            <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INTERACTIVE SCRIPTS -->
+  <script>
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        if (menuIcon) {
+          menuIcon.classList.toggle('fa-bars');
+          menuIcon.classList.toggle('fa-xmark');
+        }
+      });
+    }
+
+    function closeMobileMenu() {
+      if (mobileMenu) mobileMenu.classList.add('hidden');
+      if (menuIcon) {
+        menuIcon.classList.add('fa-bars');
+        menuIcon.classList.remove('fa-xmark');
+      }
+    }
+
+    // Set minimum appointment date to today
+    const dateInput = document.getElementById('preferredDate');
+    if (dateInput) {
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.setAttribute('min', today);
+    }
+
+    // STOP-BANG Questionnaire Calculator (Standard Validated Scoring)
+    function calculateStopBang(e) {
+      if (e) e.preventDefault();
+      const form = document.getElementById('stopBangForm');
+      if (!form) return;
+
+      const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+      const score = checkboxes.length;
+
+      // Check STOP items (first 4 questions) and high-risk modifiers
+      const stopScore = form.querySelectorAll('input[name="sb_snore"]:checked, input[name="sb_tired"]:checked, input[name="sb_observed"]:checked, input[name="sb_pressure"]:checked').length;
+      const isMale = Boolean(form.querySelector('input[name="sb_gender"]:checked'));
+      const highBmi = Boolean(form.querySelector('input[name="sb_bmi"]:checked'));
+      const largeNeck = Boolean(form.querySelector('input[name="sb_neck"]:checked'));
+
+      const resultBox = document.getElementById('stopBangResult');
+      if (!resultBox) return;
+
+      let riskCategory = "";
+      let alertClass = "";
+      let advice = "";
+
+      if (score >= 5 || (stopScore >= 2 && (isMale || highBmi || largeNeck))) {
+        riskCategory = "High Risk for Obstructive Sleep Apnea (Score: " + score + "/8)";
+        alertClass = "bg-rose-50 border-rose-300 text-rose-900";
+        advice = "Your responses indicate a high probability of Obstructive Sleep Apnea (OSA). Complete Sleep Diagnostic Care—including Level 1 Polysomnography (Sleep Study) at Aster Narayanadri Hospital—is strongly recommended to evaluate nocturnal oxygen drops.";
+      } else if (score >= 3) {
+        riskCategory = "Intermediate Risk for Sleep Apnea (Score: " + score + "/8)";
+        alertClass = "bg-amber-50 border-amber-300 text-amber-900";
+        advice = "You show moderate indicators of sleep-disordered breathing. Clinical evaluation by Dr. Napa Preetham and upper airway assessment in OPD Room 7 can determine whether a diagnostic sleep study is indicated.";
+      } else {
+        riskCategory = "Low Risk for Sleep Apnea (Score: " + score + "/8)";
+        alertClass = "bg-emerald-50 border-emerald-300 text-emerald-900";
+        advice = "Your responses currently indicate low risk for moderate-to-severe sleep apnea. If you still experience unrefreshing sleep, loud snoring, or daytime fatigue, consult Dr. Napa Preetham for a comprehensive sleep evaluation.";
+      }
+
+      resultBox.className = "mt-5 p-4 rounded-2xl border text-sm transition-all " + alertClass;
+      resultBox.innerHTML = `
+        <div class="flex items-start gap-3">
+          <i class="fa-solid fa-notes-medical text-lg mt-0.5"></i>
+          <div>
+            <p class="font-extrabold text-base">${riskCategory}</p>
+            <p class="mt-1 leading-relaxed">${advice}</p>
+            <div class="mt-3">
+              <a href="#appointment" class="inline-flex items-center gap-1.5 font-bold underline text-xs">
+                Book Complete Sleep Diagnostic Care with Dr. Preetham &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+      resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function resetStopBang() {
+      const form = document.getElementById('stopBangForm');
+      if (form) form.reset();
+      const resultBox = document.getElementById('stopBangResult');
+      if (resultBox) resultBox.classList.add('hidden');
+    }
+
+    // Attach submit listener reliably on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const sbForm = document.getElementById('stopBangForm');
+      if (sbForm) {
+        sbForm.addEventListener('submit', calculateStopBang);
+      }
+    });
+
+    // Respiratory Cough Evaluation
+    let selectedDuration = "";
+    function setLungDuration(btn, val) {
+      selectedDuration = val;
+      const allBtns = document.querySelectorAll('.lung-btn');
+      allBtns.forEach(b => {
+        b.classList.remove('bg-brand-navy', 'text-white');
+        b.classList.add('bg-white', 'text-slate-700');
+      });
+      btn.classList.remove('bg-white', 'text-slate-700');
+      btn.classList.add('bg-brand-navy', 'text-white');
+    }
+
+    function evaluateLungCheck() {
+      const rfBlood = document.getElementById('rf_blood').checked;
+      const rfWeight = document.getElementById('rf_weight').checked;
+      const rfBreath = document.getElementById('rf_breath').checked;
+      const rfFever = document.getElementById('rf_fever').checked;
+
+      const hasRedFlag = rfBlood || rfWeight || rfBreath || rfFever;
+      const resultDiv = document.getElementById('lungResult');
+      resultDiv.classList.remove('hidden');
+
+      if (!selectedDuration) {
+        resultDiv.className = "mt-5 p-4 rounded-2xl border text-sm bg-amber-50 border-amber-300 text-amber-900";
+        resultDiv.innerHTML = "<p><strong>Note:</strong> Please select the duration of your cough in Question 1 above to continue the evaluation.</p>";
+        return;
+      }
+
+      if (hasRedFlag) {
+        resultDiv.className = "mt-5 p-4 rounded-2xl border text-sm bg-rose-50 border-rose-300 text-rose-900";
+        resultDiv.innerHTML = `
+          <div class="flex items-start gap-3">
+            <i class="fa-solid fa-triangle-exclamation text-xl mt-0.5 text-rose-600"></i>
+            <div>
+              <p class="font-extrabold text-base">Red Flag Respiratory Alert Detected</p>
+              <p class="mt-1 leading-relaxed">
+                Symptoms like blood in sputum, severe breathlessness, or persistent fever with weight loss necessitate prompt investigation (such as HRCT Thorax, Sputum AFB/GeneXpert, or diagnostic bronchoscopy). Please visit Aster Narayanadri Hospital OPD Room 7 promptly or contact casualty if breathless.
+              </p>
+              <div class="mt-3">
+                <a href="#appointment" class="inline-flex items-center gap-1.5 font-bold underline text-xs">
+                  Request Priority Appointment with Dr. Napa Preetham &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (selectedDuration.includes('Chronic')) {
+        resultDiv.className = "mt-5 p-4 rounded-2xl border text-sm bg-amber-50 border-amber-300 text-amber-900";
+        resultDiv.innerHTML = `
+          <div class="flex items-start gap-3">
+            <i class="fa-solid fa-circle-info text-xl mt-0.5 text-amber-600"></i>
+            <div>
+              <p class="font-extrabold text-base">Chronic Cough Workup Recommended</p>
+              <p class="mt-1 leading-relaxed">
+                A cough persisting beyond 8 weeks without obvious infection often points toward Cough-Variant Asthma, GERD, Post-Nasal Drip, early Interstitial Lung Disease, or COPD. Pulmonary Function Testing (Spirometry) by Dr. Napa Preetham will help identify the root cause.
+              </p>
+            </div>
+          </div>
+        `;
+      } else {
+        resultDiv.className = "mt-5 p-4 rounded-2xl border text-sm bg-emerald-50 border-emerald-300 text-emerald-900";
+        resultDiv.innerHTML = `
+          <div class="flex items-start gap-3">
+            <i class="fa-solid fa-circle-check text-xl mt-0.5 text-emerald-600"></i>
+            <div>
+              <p class="font-extrabold text-base">No Critical Red Flags Identified</p>
+              <p class="mt-1 leading-relaxed">
+                Your symptoms appear consistent with acute post-viral reactivity or seasonal allergy. Maintain good hydration and monitor for any sudden chest pain or high fever. If symptoms persist beyond 2-3 weeks, visit OPD Room 7 for an evaluation.
+              </p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+      // Appointment Form Submission Handler
+    function handleAppointmentSubmit(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('patientName').value.trim();
+      const phone = document.getElementById('patientPhone').value.trim();
+      const date = document.getElementById('preferredDate').value;
+      const service = document.getElementById('serviceCategory').value;
+
+      document.getElementById('modalPatientName').textContent = name;
+      document.getElementById('modalPhone').textContent = phone;
+      document.getElementById('modalDate').textContent = date;
+      document.getElementById('modalConcern').textContent = service;
+
+      const waText = encodeURIComponent(
+        `Hello Dr. Napa Preetham Team,\n\nI have requested an OPD appointment:\n- Patient: ${name}\n- Contact: ${phone}\n- Preferred Date: ${date}\n- Service: ${service}\n\nPlease confirm my token for OPD Room 7 at Aster Narayanadri Hospital.`
+      );
+      document.getElementById('modalWhatsAppBtn').href = `https://wa.me/919966403975?text=${waText}`;
+
+      document.getElementById('bookingModal').classList.remove('hidden');
+      document.getElementById('appointmentForm').reset();
+    }
+
+    function closeModal() {
+      document.getElementById('bookingModal').classList.add('hidden');
+    }
+
+    window.addEventListener('click', function(e) {
+      const modal = document.getElementById('bookingModal');
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
